@@ -21,7 +21,12 @@ io.on('connection', socket => {
 
     socket.on('message', message => {
         io.emit('message', { player: socket.id, text: message });
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        io.emit('turn', players[currentPlayerIndex]);
+    });
 
+    socket.on('image', imageData => {
+        io.emit('image', { player: socket.id, imageData: imageData });
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
         io.emit('turn', players[currentPlayerIndex]);
     });

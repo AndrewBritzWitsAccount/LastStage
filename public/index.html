@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Turn-Based Text Game</title>
+  <title>Turn-Based Drawing Game</title>
   <style>
     .text-history {
       margin-bottom: 20px;
@@ -11,13 +11,29 @@
     .turn-info {
       margin-bottom: 10px;
     }
+    #canvas-container {
+      margin-bottom: 20px;
+    }
+    canvas {
+      border: 1px solid #000;
+    }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <h1>Turn-Based Text Game</h1>
+  <h1>Turn-Based Drawing Game</h1>
   <div class="text-history" id="text-history"></div>
   <div class="turn-info" id="turn-info"></div>
-  <input type="text" id="text-input" placeholder="Enter your text here" disabled>
+  <div id="previous-canvas-container" class="hidden">
+    <h2>Previous Drawing</h2>
+    <canvas id="previous-drawing-canvas" width="400" height="400"></canvas>
+  </div>
+  <div id="current-canvas-container">
+    <h2>Your Drawing</h2>
+    <canvas id="current-drawing-canvas" width="400" height="400"></canvas>
+  </div>
   <button id="submit-button" disabled>Submit</button>
 
   <script src="/socket.io/socket.io.js"></script>
