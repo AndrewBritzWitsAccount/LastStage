@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turn-Based Text Game</title>
+  <style>
+    .text-history {
+      margin-bottom: 20px;
+    }
+    .turn-info {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Turn-Based Text Game</h1>
+  <div class="text-history" id="text-history"></div>
+  <div class="turn-info" id="turn-info"></div>
+  <input type="text" id="text-input" placeholder="Enter your text here" disabled>
+  <button id="submit-button" disabled>Submit</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const textInput = document.getElementById('text-input');
+    const submitButton = document.getElementById('submit-button');
+    const textHistoryDiv = document.getElementById('text-history');
+    const turnInfoDiv = document.getElementById('turn-info');
+
+    socket.on('gameState', ({ textHistory, currentTurn }) => {
+      updateTextHistory(textHistory);
+      updateTurnInfo(currentTurn);
+    });
+
+    socket.on('newText', ({ textHistory, currentTurn }) => {
+      updateTextHistory(textHistory);
+      updateTurnInfo(currentTurn);
+    });
+
+    socket.on('updateTurnQueue', (turnQueue) => {
+      if (turnQueue.length > 0) {
+        updateTurnInfo(turnQueue[0]);
+      }
+    });
+
+    submitButton.addEventListener('click', () => {
+      const text = textInput.value;
+      if (text.trim() !== '') {
+        socket.emit('submitText', text);
+        textInput.value = '';
+      }
+    });
+
+    function updateTextHistory(textHistory) {
+      textHistoryDiv.innerHTML = textHistory.map(entry => `<p><strong>${entry.id}:</strong> ${entry.text}</p>`).join('');
+    }
+
+    function updateTurnInfo(currentTurn) {
+      const isMyTurn = socket.id === currentTurn;
+      turnInfoDiv.textContent = isMyTurn ? "It's your turn!" : `Waiting for ${currentTurn}`;
+      textInput.disabled = !isMyTurn;
+      submitButton.disabled = !isMyTurn;
+    }
+  </script>
+</body>
+</html>
