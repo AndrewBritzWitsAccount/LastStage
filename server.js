@@ -12,23 +12,25 @@ app.use(express.static('public'));
 
 let players = [];
 let currentPlayerIndex = 0;
+let previousDrawing = null;
 
 io.on('connection', socket => {
     console.log('A user connected');
     players.push(socket.id);
 
-    io.emit('turn', players[currentPlayerIndex]);
+    io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
 
     socket.on('message', message => {
         io.emit('message', { player: socket.id, text: message });
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', players[currentPlayerIndex]);
+        io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
     });
 
     socket.on('image', imageData => {
         io.emit('image', { player: socket.id, imageData: imageData });
+        previousDrawing = imageData;
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', players[currentPlayerIndex]);
+        io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
     });
 
     socket.on('disconnect', () => {
@@ -37,7 +39,13 @@ io.on('connection', socket => {
 
         if (socket.id === players[currentPlayerIndex]) {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-            io.emit('turn', players[currentPlayerIndex]);
+            io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
+        }
+    });
+
+    socket.on('requestPreviousDrawing', () => {
+        if (previousDrawing) {
+            socket.emit('previousDrawing', previousDrawing);
         }
     });
 });

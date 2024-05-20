@@ -20,6 +20,14 @@
     .hidden {
       display: none;
     }
+    #previous-canvas-container {
+      margin-bottom: 20px;
+    }
+    #previous-drawing-canvas {
+      width: 100%;
+      height: auto;
+      border: 1px solid #000;
+    }
   </style>
 </head>
 <body>
@@ -28,7 +36,7 @@
   <div class="turn-info" id="turn-info"></div>
   <div id="previous-canvas-container" class="hidden">
     <h2>Previous Drawing</h2>
-    <canvas id="previous-drawing-canvas" width="400" height="400"></canvas>
+    <canvas id="previous-drawing-canvas" width="200" height="200"></canvas>
   </div>
   <div id="current-canvas-container">
     <h2>Your Drawing</h2>

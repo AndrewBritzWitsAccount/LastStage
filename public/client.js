@@ -5,7 +5,10 @@ const previousContext = previousCanvas.getContext('2d');
 const currentContext = currentCanvas.getContext('2d');
 let isDrawing = false;
 
-socket.on('turn', currentPlayer => {
+socket.on('turn', ({ currentPlayer, allPlayers }) => {
+    const turnInfoElement = document.getElementById('turn-info');
+    turnInfoElement.textContent = `Current turn: ${currentPlayer === socket.id ? 'Your turn' : allPlayers.find(player => player === currentPlayer) + '\'s turn'}`;
+
     if (currentPlayer === socket.id) {
         if (!previousCanvas.classList.contains('hidden')) {
             previousCanvas.classList.add('hidden');
@@ -30,6 +33,7 @@ socket.on('turn', currentPlayer => {
         currentCanvas.removeEventListener('mouseup', stopDrawing);
         currentCanvas.removeEventListener('mouseout', stopDrawing);
         document.getElementById('submit-button').disabled = true;
+        socket.emit('requestPreviousDrawing');
     }
 });
 
@@ -42,6 +46,15 @@ socket.on('image', ({ player, imageData }) => {
         };
         img.src = imageData;
     }
+});
+
+socket.on('previousDrawing', previousDrawingData => {
+    previousCanvas.classList.remove('hidden');
+    const img = new Image();
+    img.onload = () => {
+        previousContext.drawImage(img, 0, 0, previousCanvas.width, previousCanvas.height);
+    };
+    img.src = previousDrawingData;
 });
 
 function startDrawing(e) {
