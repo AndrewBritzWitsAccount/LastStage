@@ -10,35 +10,33 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 
-let turnQueue = [];
-let textHistory = [];
+let players = [];
+let currentPlayerIndex = 0;
 
-io.on('connection', (socket) => {
-  console.log('New client connected', socket.id);
-  turnQueue.push(socket.id);
-  
-  // Send initial state to the new client
-  socket.emit('gameState', { textHistory, currentTurn: turnQueue[0] });
+io.on('connection', socket => {
+    console.log('A user connected');
+    players.push(socket.id);
 
-  // Notify all clients of the new player and updated turn queue
-  io.emit('updateTurnQueue', turnQueue);
+    io.emit('turn', players[currentPlayerIndex]);
 
-  socket.on('submitText', (text) => {
-    if (turnQueue[0] === socket.id) {
-      // Add the text to the history
-      textHistory.push({ id: socket.id, text });
-      // Rotate the turn queue
-      turnQueue.push(turnQueue.shift());
-      // Broadcast the updated text history and new turn
-      io.emit('newText', { textHistory, currentTurn: turnQueue[0] });
-    }
-  });
+    socket.on('message', message => {
+        io.emit('message', { player: socket.id, text: message });
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected', socket.id);
-    turnQueue = turnQueue.filter(id => id !== socket.id);
-    io.emit('updateTurnQueue', turnQueue);
-  });
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        io.emit('turn', players[currentPlayerIndex]);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('A user disconnected');
+        players = players.filter(playerId => playerId !== socket.id);
+
+        if (socket.id === players[currentPlayerIndex]) {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            io.emit('turn', players[currentPlayerIndex]);
+        }
+    });
 });
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

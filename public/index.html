@@ -21,47 +21,6 @@
   <button id="submit-button" disabled>Submit</button>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    const textInput = document.getElementById('text-input');
-    const submitButton = document.getElementById('submit-button');
-    const textHistoryDiv = document.getElementById('text-history');
-    const turnInfoDiv = document.getElementById('turn-info');
-
-    socket.on('gameState', ({ textHistory, currentTurn }) => {
-      updateTextHistory(textHistory);
-      updateTurnInfo(currentTurn);
-    });
-
-    socket.on('newText', ({ textHistory, currentTurn }) => {
-      updateTextHistory(textHistory);
-      updateTurnInfo(currentTurn);
-    });
-
-    socket.on('updateTurnQueue', (turnQueue) => {
-      if (turnQueue.length > 0) {
-        updateTurnInfo(turnQueue[0]);
-      }
-    });
-
-    submitButton.addEventListener('click', () => {
-      const text = textInput.value;
-      if (text.trim() !== '') {
-        socket.emit('submitText', text);
-        textInput.value = '';
-      }
-    });
-
-    function updateTextHistory(textHistory) {
-      textHistoryDiv.innerHTML = textHistory.map(entry => `<p><strong>${entry.id}:</strong> ${entry.text}</p>`).join('');
-    }
-
-    function updateTurnInfo(currentTurn) {
-      const isMyTurn = socket.id === currentTurn;
-      turnInfoDiv.textContent = isMyTurn ? "It's your turn!" : `Waiting for ${currentTurn}`;
-      textInput.disabled = !isMyTurn;
-      submitButton.disabled = !isMyTurn;
-    }
-  </script>
+  <script src="client.js"></script>
 </body>
 </html>
