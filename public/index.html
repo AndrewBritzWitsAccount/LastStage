@@ -5,27 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Broken Picture Phone</title>
   <link rel="stylesheet" href="/style.css">
+
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="client.js" defer></script>
+
 </head>
 <body>
-  <h1>Broken Picture Phone</h1>
-  <div class="text-history" id="text-history"></div>
-  <div class="turn-info" id="turn-info"></div>
-  <input type="text" id="sentence-input" class="hidden" placeholder="Enter your sentence here">
-  <div id="previous-text-container" style="display: none;">
-    <h2 id="prev-text">Previous Text</h2>
-    <p id="previous-text"></p>
-  </div>
-  <div id="previous-canvas-container" style="display: none;">
-    <h2 id="prev-drawing">Previous Drawing</h2>
-    <canvas id="previous-drawing-canvas" width="400" height="400"></canvas>
-  </div>
-  <div id="current-canvas-container">
-    <h2 id="your-drawing-title" class="hidden">Your Drawing</h2>
-    <canvas id="current-drawing-canvas" width="400" height="400" class="hidden"></canvas>
-  </div>
-  <button id="submit-button" disabled>Submit</button>
+  <div class="container">
+    <div class="text-blocks">
+      <h1>Broken Picture Phone</h1>
+      <div class="text-history" id="text-history"></div>
+      <div class="turn-info" id="turn-info"></div>
+      <input type="text" id="sentence-input" class="hidden" placeholder="Enter your sentence here">
+      <div id="previous-text-container" style="display: none;">
+        <h2 id="prev-text">Previous Text</h2>
+        <p id="previous-text"></p>
+      </div>
+    </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js"></script>
+    <div class="drawing-blocks">
+      <div id="previous-canvas-container" style="display: none;">
+        <h2 id="prev-drawing">Previous Drawing</h2>
+        <canvas id="previous-drawing-canvas"></canvas>
+      </div>
+      <div id="current-canvas-container">
+        <h2 id="your-drawing-title">Your Drawing</h2>
+        <canvas id="current-drawing-canvas"></canvas>
+      </div>
+    </div>
+
+    <div class="submit-block">
+      <button id="submit-button" disabled>Submit</button>
+    </div>
+
+  </div>
+
 </body>
 </html>
