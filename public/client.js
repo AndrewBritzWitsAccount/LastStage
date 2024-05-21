@@ -9,8 +9,9 @@ const previousTextContainer = document.getElementById('previous-text-container')
 const previousTextElement = document.getElementById('previous-text');
 const yourDrawingTitle = document.getElementById('your-drawing-title');
 let isDrawing = false;
-let currentTurnType = '';
+let currentTurnType = 'sentence';
 let isMyTurn = false;
+let roundType = 'text';
 
 socket.on('turn', ({ playerId, turnType, previousData }) => {
     currentTurnType = turnType;
@@ -32,7 +33,8 @@ socket.on('turn', ({ playerId, turnType, previousData }) => {
             img.src = previousData;
             sentenceInput.focus();
             yourDrawingTitle.style.display = 'none'; // Hide "Your Drawing" title
-        } else {
+            turnType = 'drawing';
+        } else if (turnType === 'drawing'){
             sentenceInput.classList.add('hidden');
             currentCanvas.classList.remove('hidden');
             previousCanvasContainer.style.display = 'none';
@@ -40,6 +42,7 @@ socket.on('turn', ({ playerId, turnType, previousData }) => {
             previousTextElement.innerText = previousData;
             enableDrawing();
             yourDrawingTitle.style.display = 'block'; // Show "Your Drawing" title
+            turnType = 'sentence';
         }
     } else {
         document.getElementById('turn-info').innerText = 'Waiting for other players...';
@@ -120,14 +123,34 @@ document.getElementById('submit-button').addEventListener('click', () => {
         const sentence = sentenceInput.value;
         socket.emit('sentence', sentence);
         sentenceInput.value = '';
-    } else {
+
+        displayedText();
+        currentTurnType = 'drawing';
+    } else if (currentTurnType === 'drawing'){
         const imageData = currentCanvas.toDataURL('image/png');
         socket.emit('image', imageData);
         clearCanvas(currentContext, currentCanvas);
+
+        displayedText();
+        currentTurnType = 'sentence';
     }
+
 });
 
 function clearCanvas(context, canvas) {
     context.clearRect(0, 0, canvas
         .width, canvas.height);
+}
+
+// Make sure only the stuff a player needs is displayed
+console.log(currentTurnType);
+
+function displayedText() {
+    console.log(currentTurnType);
+
+    if (currentTurnType === 'sentence') {
+        yourDrawingTitle.style.display = 'none';
+    } else if (currentTurnType === 'drawing'){
+        previousTextContainer.style.display = 'none';
+    } 
 }
