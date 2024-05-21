@@ -22,6 +22,9 @@ io.on('connection', socket => {
     if (players.length === 1) {
         // First player sends a sentence
         io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence' });
+    } else if (players.length > 1) {
+        // Notify all players of new connection, but not the first player
+        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: isDrawingTurn ? 'drawing' : 'sentence' });
     }
 
     socket.on('sentence', sentence => {
@@ -29,8 +32,7 @@ io.on('connection', socket => {
         isDrawingTurn = true;
         io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'drawing' });
-        io.emit('sentence', sentence);
+        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'drawing', previousData: sentence });
     });
 
     socket.on('image', imageData => {
@@ -38,8 +40,7 @@ io.on('connection', socket => {
         isDrawingTurn = false;
         io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence' });
-        io.emit('image', imageData);
+        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence', previousData: imageData });
     });
 
     socket.on('disconnect', () => {

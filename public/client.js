@@ -1,17 +1,21 @@
 const socket = io();
 const previousCanvas = document.getElementById('previous-drawing-canvas');
+const previousCanvasContainer = document.getElementById('previous-canvas-container');
 const currentCanvas = document.getElementById('current-drawing-canvas');
 const previousContext = previousCanvas.getContext('2d');
 const currentContext = currentCanvas.getContext('2d');
 const sentenceInput = document.getElementById('sentence-input');
+const previousTextContainer = document.getElementById('previous-text-container');
+const previousTextElement = document.getElementById('previous-text');
+const yourDrawingTitle = document.getElementById('your-drawing-title');
 let isDrawing = false;
 let currentTurnType = '';
 let isMyTurn = false;
 
-socket.on('turn', ({ playerId, turnType }) => {
+socket.on('turn', ({ playerId, turnType, previousData }) => {
     currentTurnType = turnType;
     isMyTurn = playerId === socket.id;
-    
+
     if (isMyTurn) {
         document.getElementById('turn-info').innerText = 'Your Turn!';
         document.getElementById('submit-button').disabled = false;
@@ -19,15 +23,30 @@ socket.on('turn', ({ playerId, turnType }) => {
         if (turnType === 'sentence') {
             sentenceInput.classList.remove('hidden');
             currentCanvas.classList.add('hidden');
+            previousCanvasContainer.style.display = previousData ? 'block' : 'none'; // Show previous canvas only if there's previous data
+            const img = new Image();
+            img.onload = () => {
+                previousContext.clearRect(0, 0, previousCanvas.width, previousCanvas.height); // Clear previous drawing
+                previousContext.drawImage(img, 0, 0, previousCanvas.width, previousCanvas.height);
+            };
+            img.src = previousData;
             sentenceInput.focus();
+            yourDrawingTitle.style.display = 'none'; // Hide "Your Drawing" title
         } else {
             sentenceInput.classList.add('hidden');
             currentCanvas.classList.remove('hidden');
+            previousCanvasContainer.style.display = 'none';
+            previousTextContainer.style.display = 'block';
+            previousTextElement.innerText = previousData;
             enableDrawing();
+            yourDrawingTitle.style.display = 'block'; // Show "Your Drawing" title
         }
     } else {
         document.getElementById('turn-info').innerText = 'Waiting for other players...';
         document.getElementById('submit-button').disabled = true;
+        previousTextContainer.style.display = 'none';
+        previousCanvasContainer.style.display = 'none';
+        yourDrawingTitle.style.display = 'none'; // Hide "Your Drawing" title
 
         if (turnType === 'sentence') {
             sentenceInput.classList.add('hidden');
@@ -52,9 +71,9 @@ socket.on('sentence', sentence => {
 });
 
 socket.on('image', imageData => {
-    previousCanvas.classList.remove('hidden');
     const img = new Image();
     img.onload = () => {
+        previousContext.clearRect(0, 0, previousCanvas.width, previousCanvas.height); // Clear previous drawing
         previousContext.drawImage(img, 0, 0, previousCanvas.width, previousCanvas.height);
     };
     img.src = imageData;
@@ -109,5 +128,6 @@ document.getElementById('submit-button').addEventListener('click', () => {
 });
 
 function clearCanvas(context, canvas) {
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, canvas
+        .width, canvas.height);
 }
