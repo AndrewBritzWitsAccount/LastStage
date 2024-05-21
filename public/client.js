@@ -327,7 +327,7 @@ function disableDrawing() {
     currentCanvas.removeEventListener('mouseout', stopDrawing);
 }
 
-document.getElementById('submit-button').addEventListener('click', () => {
+function handleSubmit() {
     if (currentTurnType === 'sentence') {
         const sentence = sentenceInput.value;
         socket.emit('sentence', sentence);
@@ -343,7 +343,9 @@ document.getElementById('submit-button').addEventListener('click', () => {
         updateDisplay();
         currentTurnType = 'sentence';
     }
-});
+}
+
+document.getElementById('submit-button').addEventListener('click', handleSubmit);
 
 function clearCanvas(context, canvas) {
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -362,3 +364,9 @@ function updateDisplay() {
         currentCanvasContainer.style.display = 'block';
     } 
 }
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        handleSubmit();
+    }
+});
