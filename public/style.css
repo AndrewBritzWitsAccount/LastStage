@@ -64,9 +64,12 @@ canvas {
   width: 80%;
   border: 2px solid var(--secondary-color);
   background-color: var(--header-footer-bg);
-  color: var(--text-color);
+  color: var(--secondary-color);
   font-size: 1rem;
+  font-style: italic;
+  font-size: larger;
   text-align: center;
+  font-weight: bold;
 }
 
 #previous-text-container, #previous-canvas-container, #current-canvas-container {
