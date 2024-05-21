@@ -16,11 +16,15 @@ body {
   font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
+  height: 100vh;
+}
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
+  align-content: space-between;
+  height: 100%;
+  justify-content: space-between;
 }
 
 h1, h2 {
@@ -46,6 +50,8 @@ h1, h2 {
 canvas {
   border: 2px solid var(--canvas-border-color);
   background-color: #ffffff;
+  width: 80%;
+  height: 80%;
 }
 
 .hidden {
@@ -77,6 +83,7 @@ button {
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 10px;
+  margin-bottom: 1rem;
 }
 
 button:disabled {
@@ -85,4 +92,15 @@ button:disabled {
 
 button:hover:enabled {
   background-color: var(--secondary-color);
+}
+
+.drawing-blocks {
+  height: 60%;
+  width: 60%;
+}
+
+
+div#current-canvas-container,
+div#previous-canvas-container  {
+  height: 100%;
 }
