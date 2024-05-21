@@ -12,40 +12,44 @@ app.use(express.static('public'));
 
 let players = [];
 let currentPlayerIndex = 0;
-let previousDrawing = null;
+let gameData = [];
+let isDrawingTurn = false; // Track if the current turn is for drawing or writing
 
 io.on('connection', socket => {
     console.log('A user connected');
     players.push(socket.id);
 
-    io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
+    if (players.length === 1) {
+        // First player sends a sentence
+        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence' });
+    }
 
-    socket.on('message', message => {
-        io.emit('message', { player: socket.id, text: message });
+    socket.on('sentence', sentence => {
+        gameData.push({ type: 'sentence', content: sentence });
+        isDrawingTurn = true;
+        io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
+        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'drawing' });
+        io.emit('sentence', sentence);
     });
 
     socket.on('image', imageData => {
-        io.emit('image', { player: socket.id, imageData: imageData });
-        previousDrawing = imageData;
+        gameData.push({ type: 'image', content: imageData });
+        isDrawingTurn = false;
+        io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
+        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence' });
+        io.emit('image', imageData);
     });
 
     socket.on('disconnect', () => {
         console.log('A user disconnected');
         players = players.filter(playerId => playerId !== socket.id);
-
-        if (socket.id === players[currentPlayerIndex]) {
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-            io.emit('turn', { currentPlayer: players[currentPlayerIndex], allPlayers: players });
-        }
-    });
-
-    socket.on('requestPreviousDrawing', () => {
-        if (previousDrawing) {
-            socket.emit('previousDrawing', previousDrawing);
+        if (players.length === 0) {
+            // Reset game state if all players disconnect
+            gameData = [];
+            currentPlayerIndex = 0;
+            isDrawingTurn = false;
         }
     });
 });

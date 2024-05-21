@@ -3,61 +3,65 @@ const previousCanvas = document.getElementById('previous-drawing-canvas');
 const currentCanvas = document.getElementById('current-drawing-canvas');
 const previousContext = previousCanvas.getContext('2d');
 const currentContext = currentCanvas.getContext('2d');
+const sentenceInput = document.getElementById('sentence-input');
 let isDrawing = false;
+let currentTurnType = '';
+let isMyTurn = false;
 
-socket.on('turn', ({ currentPlayer, allPlayers }) => {
-    const turnInfoElement = document.getElementById('turn-info');
-    turnInfoElement.textContent = `Current turn: ${currentPlayer === socket.id ? 'Your turn' : allPlayers.find(player => player === currentPlayer) + '\'s turn'}`;
-
-    if (currentPlayer === socket.id) {
-        if (!previousCanvas.classList.contains('hidden')) {
-            previousCanvas.classList.add('hidden');
-        }
-        if (currentCanvas.classList.contains('hidden')) {
-            currentCanvas.classList.remove('hidden');
-        }
-        currentCanvas.addEventListener('mousedown', startDrawing);
-        currentCanvas.addEventListener('mousemove', draw);
-        currentCanvas.addEventListener('mouseup', stopDrawing);
-        currentCanvas.addEventListener('mouseout', stopDrawing);
+socket.on('turn', ({ playerId, turnType }) => {
+    currentTurnType = turnType;
+    isMyTurn = playerId === socket.id;
+    
+    if (isMyTurn) {
+        document.getElementById('turn-info').innerText = 'Your Turn!';
         document.getElementById('submit-button').disabled = false;
-    } else {
-        if (!previousCanvas.classList.contains('hidden')) {
-            previousCanvas.classList.add('hidden');
-        }
-        if (!currentCanvas.classList.contains('hidden')) {
+
+        if (turnType === 'sentence') {
+            sentenceInput.classList.remove('hidden');
             currentCanvas.classList.add('hidden');
+            sentenceInput.focus();
+        } else {
+            sentenceInput.classList.add('hidden');
+            currentCanvas.classList.remove('hidden');
+            enableDrawing();
         }
-        currentCanvas.removeEventListener('mousedown', startDrawing);
-        currentCanvas.removeEventListener('mousemove', draw);
-        currentCanvas.removeEventListener('mouseup', stopDrawing);
-        currentCanvas.removeEventListener('mouseout', stopDrawing);
+    } else {
+        document.getElementById('turn-info').innerText = 'Waiting for other players...';
         document.getElementById('submit-button').disabled = true;
-        socket.emit('requestPreviousDrawing');
+
+        if (turnType === 'sentence') {
+            sentenceInput.classList.add('hidden');
+        } else {
+            currentCanvas.classList.add('hidden');
+            disableDrawing();
+        }
     }
 });
 
-socket.on('image', ({ player, imageData }) => {
-    if (player !== socket.id) {
-        previousCanvas.classList.remove('hidden');
-        const img = new Image();
-        img.onload = () => {
-            previousContext.drawImage(img, 0, 0, previousCanvas.width, previousCanvas.height);
-        };
-        img.src = imageData;
+socket.on('endTurn', (playerId) => {
+    if (playerId === socket.id) {
+        disableDrawing();
     }
 });
 
-socket.on('previousDrawing', previousDrawingData => {
+socket.on('sentence', sentence => {
+    const textHistory = document.getElementById('text-history');
+    const sentenceElement = document.createElement('p');
+    sentenceElement.innerText = sentence;
+    textHistory.appendChild(sentenceElement);
+});
+
+socket.on('image', imageData => {
     previousCanvas.classList.remove('hidden');
     const img = new Image();
     img.onload = () => {
         previousContext.drawImage(img, 0, 0, previousCanvas.width, previousCanvas.height);
     };
-    img.src = previousDrawingData;
+    img.src = imageData;
 });
 
 function startDrawing(e) {
+    if (!isMyTurn) return;
     isDrawing = true;
     draw(e);
 }
@@ -78,10 +82,30 @@ function stopDrawing() {
     currentContext.beginPath();
 }
 
+function enableDrawing() {
+    currentCanvas.addEventListener('mousedown', startDrawing);
+    currentCanvas.addEventListener('mousemove', draw);
+    currentCanvas.addEventListener('mouseup', stopDrawing);
+    currentCanvas.addEventListener('mouseout', stopDrawing);
+}
+
+function disableDrawing() {
+    currentCanvas.removeEventListener('mousedown', startDrawing);
+    currentCanvas.removeEventListener('mousemove', draw);
+    currentCanvas.removeEventListener('mouseup', stopDrawing);
+    currentCanvas.removeEventListener('mouseout', stopDrawing);
+}
+
 document.getElementById('submit-button').addEventListener('click', () => {
-    const imageData = currentCanvas.toDataURL('image/png');
-    socket.emit('image', imageData);
-    clearCanvas(currentContext, currentCanvas);
+    if (currentTurnType === 'sentence') {
+        const sentence = sentenceInput.value;
+        socket.emit('sentence', sentence);
+        sentenceInput.value = '';
+    } else {
+        const imageData = currentCanvas.toDataURL('image/png');
+        socket.emit('image', imageData);
+        clearCanvas(currentContext, currentCanvas);
+    }
 });
 
 function clearCanvas(context, canvas) {
