@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -8,7 +9,12 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static('public'));
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+// Serve game.html as the default file for the root URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'game.html'));
+});
 
 let players = [];
 let currentPlayerIndex = 0;

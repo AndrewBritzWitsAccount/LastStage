@@ -1,25 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Screen</title>
-    <style>
-        #game-screen { display: none; }
-        #game-form input { display: block; margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turn-Based Drawing Game</title>
+  <style>
+    .text-history {
+      margin-bottom: 20px;
+    }
+    .turn-info {
+      margin-bottom: 10px;
+    }
+    #canvas-container {
+      margin-bottom: 20px;
+    }
+    canvas {
+      border: 1px solid #000;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div id="game-screen">
-        <h1>Game Screen</h1>
-        <div id="game-state"></div>
-        <form id="game-form">
-            <input type="text" id="game-input" disabled />
-            <button type="submit">Submit</button>
-        </form>
-    </div>
+  <h1>Turn-Based Drawing Game</h1>
+  <div class="text-history" id="text-history"></div>
+  <div class="turn-info" id="turn-info"></div>
+  <input type="text" id="sentence-input" class="hidden" placeholder="Enter your sentence here">
+  <div id="previous-text-container" style="display: none;">
+    <h2 id="prev-text">Previous Text</h2>
+    <p id="previous-text"></p>
+  </div>
+  <div id="previous-canvas-container" style="display: none;">
+    <h2 id="prev-drawing">Previous Drawing</h2>
+    <canvas id="previous-drawing-canvas" width="400" height="400"></canvas>
+  </div>
+  <div id="current-canvas-container">
+    <h2 id="your-drawing-title" class="hidden">Your Drawing</h2>
+    <canvas id="current-drawing-canvas" width="400" height="400"></canvas>
+  </div>
+  <button id="submit-button" disabled>Submit</button>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="client.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
 </body>
 </html>

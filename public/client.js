@@ -33,6 +33,8 @@ socket.on('turn', ({ playerId, turnType, previousData }) => {
     currentTurnType = turnType;
     isMyTurn = playerId === socket.id;
 
+    console.log(`Turn type: ${turnType}, Is my turn: ${isMyTurn}, Player ID: ${playerId}`);
+
     if (isMyTurn) {
         document.getElementById('turn-info').innerText = 'Your Turn!';
         document.getElementById('submit-button').disabled = false;
@@ -58,8 +60,10 @@ socket.on('turn', ({ playerId, turnType, previousData }) => {
             previousCanvasContainer.style.display = 'none';
             previousTextContainer.style.display = 'block';
             previousTextElement.innerText = previousData;
-            enableDrawing();
             yourDrawingTitle.style.display = 'block';
+            currentCanvas.classList.remove('hidden');
+            enableDrawing();
+            console.log('Drawing enabled for player');
         }
     } else {
         document.getElementById('turn-info').innerText = 'Waiting for other players...';
@@ -72,6 +76,7 @@ socket.on('turn', ({ playerId, turnType, previousData }) => {
             sentenceInput.classList.add('hidden');
         } else {
             currentCanvasContainer.style.display = 'none';
+            currentCanvas.classList.add('hidden');
             disableDrawing();
         }
     }
@@ -103,6 +108,7 @@ socket.on('image', imageData => {
 function startDrawing(e) {
     if (!isMyTurn) return;
     isDrawing = true;
+    console.log('Start drawing', e.clientX, e.clientY);
     draw(e);
 }
 
@@ -116,11 +122,14 @@ function draw(e) {
     currentContext.stroke();
     currentContext.beginPath();
     currentContext.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    console.log('Drawing', e.clientX, e.clientY);
 }
 
 function stopDrawing() {
+    if (!isDrawing) return;
     isDrawing = false;
     currentContext.beginPath();
+    console.log('Stop drawing');
 }
 
 function enableDrawing() {
@@ -128,6 +137,7 @@ function enableDrawing() {
     currentCanvas.addEventListener('mousemove', draw);
     currentCanvas.addEventListener('mouseup', stopDrawing);
     currentCanvas.addEventListener('mouseout', stopDrawing);
+    console.log('Drawing events enabled');
 }
 
 function disableDrawing() {
@@ -135,6 +145,7 @@ function disableDrawing() {
     currentCanvas.removeEventListener('mousemove', draw);
     currentCanvas.removeEventListener('mouseup', stopDrawing);
     currentCanvas.removeEventListener('mouseout', stopDrawing);
+    console.log('Drawing events disabled');
 }
 
 function handleSubmit() {
@@ -169,10 +180,10 @@ function updateDisplay() {
         yourDrawingTitle.style.display = 'none';
         currentCanvasContainer.style.display = 'none';
         previousCanvasContainer.style.display = 'block';
-    } else if (currentTurnType === 'drawing'){
+    } else if (currentTurnType === 'drawing') {
         previousTextContainer.style.display = 'none';
         currentCanvasContainer.style.display = 'block';
-    } 
+    }
 }
 
 document.addEventListener('keydown', (e) => {
