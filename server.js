@@ -20,6 +20,8 @@ let players = [];
 let currentPlayerIndex = 0;
 let gameData = [];
 let isDrawingTurn = false; // Track if the current turn is for drawing or writing
+let totalTurns = 0;
+const maxRounds = 1; // Set the maximum number of rounds here
 
 io.on('connection', socket => {
     console.log('A user connected');
@@ -36,17 +38,31 @@ io.on('connection', socket => {
     socket.on('sentence', sentence => {
         gameData.push({ type: 'sentence', content: sentence });
         isDrawingTurn = true;
-        io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'drawing', previousData: sentence });
+        totalTurns++;
+
+        if (totalTurns >= maxRounds * players.length * 2) {
+            io.emit('gameOver', gameData); // Notify all players that the game is over
+            resetGameState();
+        } else {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
+            io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'drawing', previousData: sentence });
+        }
     });
 
     socket.on('image', imageData => {
         gameData.push({ type: 'image', content: imageData });
         isDrawingTurn = false;
-        io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence', previousData: imageData });
+        totalTurns++;
+
+        if (totalTurns >= maxRounds * players.length * 2) {
+            io.emit('gameOver', gameData); // Notify all players that the game is over
+            resetGameState();
+        } else {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
+            io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence', previousData: imageData });
+        }
     });
 
     socket.on('disconnect', () => {
@@ -54,12 +70,17 @@ io.on('connection', socket => {
         players = players.filter(playerId => playerId !== socket.id);
         if (players.length === 0) {
             // Reset game state if all players disconnect
-            gameData = [];
-            currentPlayerIndex = 0;
-            isDrawingTurn = false;
+            resetGameState();
         }
     });
 });
+
+function resetGameState() {
+    gameData = [];
+    currentPlayerIndex = 0;
+    isDrawingTurn = false;
+    totalTurns = 0;
+}
 
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

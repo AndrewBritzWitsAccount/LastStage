@@ -88,6 +88,31 @@ socket.on('endTurn', (playerId) => {
     }
 });
 
+socket.on('gameOver', (gameData) => {
+    document.getElementById('turn-info').innerText = 'Game Over!';
+    document.getElementById('submit-button').disabled = true;
+    sentenceInput.classList.add('hidden');
+    currentCanvasContainer.style.display = 'none';
+    previousCanvasContainer.style.display = 'none';
+    yourDrawingTitle.style.display = 'none';
+    disableDrawing();
+
+    // Display the final game data
+    const textHistory = document.getElementById('text-history');
+    textHistory.innerHTML = '<h2>Final Game Data</h2>';
+    gameData.forEach(item => {
+        if (item.type === 'sentence') {
+            const sentenceElement = document.createElement('p');
+            sentenceElement.innerText = item.content;
+            textHistory.appendChild(sentenceElement);
+        } else if (item.type === 'image') {
+            const img = new Image();
+            img.src = item.content;
+            textHistory.appendChild(img);
+        }
+    });
+});
+
 socket.on('sentence', sentence => {
     const textHistory = document.getElementById('text-history');
     const sentenceElement = document.createElement('p');
@@ -108,7 +133,7 @@ socket.on('image', imageData => {
 function startDrawing(e) {
     if (!isMyTurn) return;
     isDrawing = true;
-    console.log('Start drawing', e.clientX, e.clientY);
+    currentContext.beginPath(); // Start a new path when drawing starts
     draw(e);
 }
 
@@ -122,14 +147,12 @@ function draw(e) {
     currentContext.stroke();
     currentContext.beginPath();
     currentContext.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    console.log('Drawing', e.clientX, e.clientY);
 }
 
 function stopDrawing() {
     if (!isDrawing) return;
     isDrawing = false;
-    currentContext.beginPath();
-    console.log('Stop drawing');
+    currentContext.beginPath(); // Reset the path when drawing stops
 }
 
 function enableDrawing() {
@@ -174,8 +197,6 @@ function clearCanvas(context, canvas) {
 
 // Make sure only the stuff a player needs is displayed
 function updateDisplay() {
-    console.log(currentTurnType);
-
     if (currentTurnType === 'sentence') {
         yourDrawingTitle.style.display = 'none';
         currentCanvasContainer.style.display = 'none';
