@@ -1,32 +1,39 @@
-const express = require('express');
-const db = require('../db');
-const router = express.Router();
+document.addEventListener('DOMContentLoaded', async () => {
+  const response = await fetch('/logged-users');
+  const users = await response.json();
 
-let loggedUsers = [];
-let gameStarted = false;
-let adminUser = null;
+  const usersList = document.getElementById('users');
+  users.forEach(user => {
+      const li = document.createElement('li');
+      li.textContent = `${user.username} ${user.isAdmin ? '(Admin)' : ''}`;
+      usersList.appendChild(li);
+  });
 
-// Check lobby status
-router.get('/', (req, res) => {
-  if (loggedUsers.length < 3) {
-    return res.status(200).json({ message: "Waiting for more players", players: loggedUsers });
+  const username = localStorage.getItem('username');
+  const loggedInUser = users.find(user => user.username === username);
+
+  // Notify the server that this user joined the game
+  const socket = io();
+  socket.emit('joinGame', { username });
+
+  if (loggedInUser && loggedInUser.isAdmin) {
+      const startGameButton = document.getElementById('startGameButton');
+      startGameButton.style.display = 'block';
+      startGameButton.addEventListener('click', async () => {
+          const startResponse = await fetch('/start-game', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username })
+          });
+
+          const result = await startResponse.json();
+          if (startResponse.status === 200) {
+              alert('Game started!');
+              // Redirect to the game page
+              window.location.href = '../game.html';
+          } else {
+              alert(result.error);
+          }
+      });
   }
-  if (gameStarted) {
-    return res.status(200).json({ message: "Game already started", players: loggedUsers });
-  }
-  res.status(200).json({ message: "Ready to start", players: loggedUsers, admin: adminUser });
 });
-
-// Admin starts the game
-router.post('/start-game', (req, res) => {
-  if (req.session.username !== adminUser) {
-    return res.status(403).json({ error: "Only the admin can start the game" });
-  }
-  if (loggedUsers.length < 3) {
-    return res.status(400).json({ error: "Need at least 3 players to start the game" });
-  }
-  gameStarted = true;
-  res.status(200).json({ message: "Game started" });
-});
-
-module.exports = router;

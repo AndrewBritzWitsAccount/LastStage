@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const username = localStorage.getItem('username');
     const loggedInUser = users.find(user => user.username === username);
     
-    if (loggedInUser && loggedInUser.isAdmin) {
+    if (users.length >= 3) {  // loggedInUser && loggedInUser.isAdmin
         const startGameButton = document.getElementById('startGameButton');
         startGameButton.style.display = 'block';
         startGameButton.addEventListener('click', async () => {
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (startResponse.status === 200) {
                     alert('Game started!');
                     // Redirect to the game page
-                    window.location.href = '/game';
+                    window.location.href = '../game.html';
                 } else {
                     alert(result.error);
                 }
