@@ -25,7 +25,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 // Serve game.html as the default file for the root URL
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public/', 'register.html'));
 });
 
 app.get('/register', (req, res) => {
@@ -109,9 +109,20 @@ app.post('/gameDescription', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('joinGame', (username) => {
-    players.push({ id: socket.id, username: username });
+    if (players.length == 0) {
+      players.push({ id: socket.id, username: username, isAdmin: true });
+    } else {
+      players.push({ id: socket.id, username: username, isAdmin: false });
+    }
     socket.emit('playerList', players);
     socket.broadcast.emit('newPlayerList', players);
+    // if (players.length >= 2) {
+    //   socket.emit('gameStart', 'Game has started');
+    //   socket.broadcast.emit('joinGameStart', 'Game has started');
+    // }
+  });
+
+  socket.on('start', () => {
     if (players.length >= 2) {
       socket.emit('gameStart', 'Game has started');
       socket.broadcast.emit('joinGameStart', 'Game has started');
