@@ -11,36 +11,34 @@
   </head>
   <body>
     <div class="container">
+      <h1>Broken Picture Phone</h1>
       <div class="text-blocks">
-        <h1>Broken Picture Phone</h1>
         <div class="text-history" id="text-history"></div>
         <div class="turn-info" id="turn-info"></div>
         <input
           type="text"
           id="sentence-input"
-          class="hidden"
           placeholder="Enter your sentence here"
         />
+        <button id="submit-text" class="button">Submit</button>
         <div id="previous-text-container" style="display: none">
           <h2 id="prev-text">Previous Text</h2>
           <p id="previous-text"></p>
         </div>
       </div>
-
+      <div id="display-text"></div>
       <div id="canvas-container">
         <div id="previous-canvas-container" style="display: none">
           <h2 id="prev-drawing">Previous Drawing</h2>
           <canvas id="previous-drawing-canvas"></canvas>
         </div>
         <div id="current-canvas-container">
-          <h2 id="your-drawing-title">Your Drawing</h2>
-          <canvas id="current-drawing-canvas"></canvas>
+          <canvas class="canvas-container" id="current-drawing-canvas"></canvas>
         </div>
       </div>
       <div></div>
       <div class="submit-block">
-        <button class="hidden" id="submit-text">Submit</button>
-        <button class="hidden" id="submit-drawing">Submit</button>
+        <button id="submit-drawing" class="button">Submit</button>
       </div>
     </div>
   </body>

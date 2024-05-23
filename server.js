@@ -69,19 +69,19 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/uploadImage', (req, res) => {
+app.post('/uploadImage', async (req, res) => {
   const imageData = req.body.imageData;
   const base64Data = imageData.replace(/^data:image\/png;base64,/, '');
   const fileName = `image-${Date.now()}.png`;
   const savePath = path.join(__dirname, 'uploads', fileName);
-  fs.writeFile(savePath, base64Data, 'base64', (err) => {
+  fs.writeFile(savePath, base64Data, 'base64', async (err) => {
     if (err) {
       console.error(err);
       res.status(500).send('Error saving image');
     } else {
       const imageUrl = `http://localhost:${PORT}/uploads/${fileName}`;
-      const insertResponse = db.saveGameImage(imageUrl);
-      if (insertResponse) res.json({ imageUrl });
+      const insertResponse = await db.saveGameImage(imageUrl);
+      res.status(200).send('Image saved successfully');
     }
   });
 });
@@ -131,13 +131,17 @@ io.on('connection', (socket) => {
 
   socket.on('getTurn', () => {
     if (players.length >= 2) {
-      const randomPlayer = players[Math.floor(Math.random() * players.length)];
-      players.forEach((player) => {
-        player.turnType =
-          player.id === randomPlayer.id ? 'sentence' : 'nothing';
+      const randomPlayer = players[0];
+      socket.emit('startTurn', {
+        player: randomPlayer.username,
+        currentPlayerIndex: players.indexOf(randomPlayer),
+        turnType: 'sentence',
       });
-      socket.emit('turn', players);
-      socket.broadcast.emit('activePlayer', players);
+      //   socket.broadcast.emit('activePlayer', {
+      //     players,
+      //     currentPlayerIndex: currentPlayerIndex,
+      //     turnType: isDrawingTurn ? 'drawing' : 'sentence',
+      //   });
     }
   });
 
@@ -156,51 +160,50 @@ io.on('connection', (socket) => {
     }
   });
 
-  // console.log('A user connected');
-  // players.push(socket.id);
-
-  // if (players.length === 1) {
-  //     // First player sends a sentence
-  //     io.emit('turn', { playerId: players[currentPlayerIndex], turnType: 'sentence' });
-  // } else if (players.length > 1) {
-  //     // Notify all players of new connection, but not the first player
-  //     io.emit('turn', { playerId: players[currentPlayerIndex], turnType: isDrawingTurn ? 'drawing' : 'sentence' });
-  // }
-
   socket.on('sentence', (sentence) => {
     gameData.push({ type: 'sentence', content: sentence });
     isDrawingTurn = true;
     totalTurns++;
-
     if (totalTurns >= maxRounds * players.length * 2) {
       io.emit('gameOver', gameData); // Notify all players that the game is over
       resetGameState();
     } else {
       currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
-      io.emit('turn', {
-        playerId: players[currentPlayerIndex],
-        turnType: 'drawing',
+
+      //   socket.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
+      console.log('players', currentPlayerIndex);
+      socket.emit('turn', {
+        player: players[currentPlayerIndex].username,
+        turnType: isDrawingTurn ? 'drawing' : 'sentence',
+        previousData: sentence,
+      });
+      socket.broadcast.emit('turn', {
+        player: players[currentPlayerIndex].username,
+        turnType: isDrawingTurn ? 'drawing' : 'sentence',
         previousData: sentence,
       });
     }
   });
 
-  socket.on('image', (imageData) => {
-    gameData.push({ type: 'image', content: imageData });
+  socket.on('image', () => {
+    // gameData.push({ type: 'image', content: imageData });
     isDrawingTurn = false;
     totalTurns++;
 
     if (totalTurns >= maxRounds * players.length * 2) {
       io.emit('gameOver', gameData); // Notify all players that the game is over
       resetGameState();
+      console.log('game over');
     } else {
       currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      io.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
-      io.emit('turn', {
-        playerId: players[currentPlayerIndex],
-        turnType: 'sentence',
-        previousData: imageData,
+      socket.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
+      socket.emit('turn', {
+        player: players[currentPlayerIndex].username,
+        turnType: isDrawingTurn ? 'drawing' : 'sentence',
+      });
+      socket.broadcast.emit('turn', {
+        player: players[currentPlayerIndex].username,
+        turnType: isDrawingTurn ? 'drawing' : 'sentence',
       });
     }
   });
