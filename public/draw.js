@@ -50,7 +50,7 @@ socket.on('gameOver', (gameData) => {
   console.log(gameData);
   // sort gameData by the time it has for each entry ascending order
   gameData.sort((a, b) => new Date(a.time) - new Date(b.time));
-
+  document.getElementById('display-text').classList.remove('hidden');
   // insert a text into html div with id dispal-text
   document.getElementById('display-text').innerHTML = 'Game Over';
 
