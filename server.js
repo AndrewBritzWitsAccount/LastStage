@@ -55,8 +55,9 @@ app.post('/login', async (req, res) => {
   // Handle user login
   const { username, password } = req.body;
   const user = await db.getUser(username);
+  const present = await db.checkIfLoggedIn(user.id);
   let loginMessage = 'Login successful';
-  if (user) {
+  if (user && !present) {
     const isPasswordCorrect = bycrypt.compareSync(password, user.password);
     if (isPasswordCorrect) {
       if (players.length === 0) {

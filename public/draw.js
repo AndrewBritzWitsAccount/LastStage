@@ -84,6 +84,9 @@ function showStats(gameData) {
   // iterate through the gameData array and display the content of each entry in a list within display-text
   gameData.forEach((entry) => {
     const li = document.createElement('li');
+    li.style.paddingBottom = '10px';
+    // add padding between elements
+
     console.log(entry);
     if (entry.type === 'sentence') {
       // if the entry is text
@@ -96,7 +99,14 @@ function showStats(gameData) {
       //remove http://localhost:3000 from the image url
       entry.content = entry.content.replace('http://localhost:${PORT}', '');
       img.src = entry.content;
-      li.appendChild(img);
+      // add title to image
+      img.alt = 'Image by ' + entry.username;
+
+      const label = document.createElement('label');
+      label.textContent = 'Image by ' + entry.username;
+      label.appendChild(img);
+
+      li.appendChild(label);
     }
     displayText.appendChild(li);
   });

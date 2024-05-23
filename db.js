@@ -184,6 +184,21 @@ db.logInUser = (userId, isAdmin) => {
     }
   );
 };
+
+db.checkIfLoggedIn = (userId) => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT * FROM loggedInUsers WHERE userId = ?`,
+      [userId],
+      (err, row) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(row);
+      }
+    );
+  });
+};
 // Close the database connection
 // db.close();
 
