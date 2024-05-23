@@ -1,3 +1,42 @@
+const username = window.localStorage.getItem('username');
+socket = io();
+socket.emit('getTurn');
+socket.on('turn', (data) => {
+  data.forEach((player) => {
+    if (player.username == username && player.turnType === 'sentence') {
+      enableSentenceInput();
+    } else if (player.username == username && player.turnType === 'drawing') {
+      disableSentenceInput();
+    }
+  });
+  console.log(data);
+});
+
+socket.on('activePlayer', (data) => {
+  data.forEach((player) => {
+    if (player.username == username && player.turnType === 'sentence') {
+      enableSentenceInput();
+    } else if (player.username == username && player.turnType === 'drawing') {
+      disableSentenceInput();
+    }
+  });
+  console.log(data);
+});
+
+// function to turn input field with id sentence-input class from hidden to visible
+function enableSentenceInput() {
+  document.getElementById('sentence-input').classList.remove('hidden');
+  document.getElementById('current-canvas-container').classList.add('hidden');
+}
+
+// function to turn input field with id sentence-input class from visible to hidden
+function disableSentenceInput() {
+  document.getElementById('sentence-input').classList.add('hidden');
+  document
+    .getElementById('current-canvas-container')
+    .classList.remove('hidden');
+}
+
 const currentCanvas = document.getElementById('current-drawing-canvas');
 const currentContext = currentCanvas.getContext('2d');
 const canvasParent = document.getElementById('current-canvas-container');
@@ -59,4 +98,28 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   if (response.ok) {
     console.log('Image uploaded successfully');
   }
+});
+
+// Get the submit button element
+const submitButton = document.getElementById('submit-button');
+
+// Add event listener to the submit button
+submitButton.addEventListener('click', async () => {
+  // Get the input element
+  const inputElement = document.getElementById('sentence-input');
+
+  // Get the text from the input field
+  const desc = inputElement.value;
+
+  // Define the data to be sent to the server
+  const data = {
+    desc,
+  };
+  const response = await fetch('/gameDescription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
 });

@@ -16,7 +16,7 @@ document
     if (response.status === 200) {
       // add username to local storage
       localStorage.setItem('username', username);
-      console.log(response);
+      localStorage.setItem('userId', response.userId);
       window.location.href = '/lobby';
     } else {
       console.log('Login failed');

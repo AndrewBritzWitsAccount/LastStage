@@ -23,8 +23,6 @@ socket.on('newPlayerList', (players) => {
   updatePlayerList(players);
 });
 
-socket.on;
-
 socket.on('gameStart', (message) => {
   console.log(message);
   window.location.href = '/game';

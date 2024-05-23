@@ -119,13 +119,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getTurn', () => {
-    if (players.length >= 3) {
-      //randomly select a player from players array
+    if (players.length >= 2) {
       const randomPlayer = players[Math.floor(Math.random() * players.length)];
-      socket.emit('turn', {
-        playerId: randomPlayer.id,
-        turnType: isDrawingTurn ? 'drawing' : 'sentence',
+      players.forEach((player) => {
+        player.turnType =
+          player.id === randomPlayer.id ? 'drawing' : 'sentence';
       });
+      socket.emit('turn', players);
+      socket.broadcast.emit('activePlayer', players);
     }
   });
 
