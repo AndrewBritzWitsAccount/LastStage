@@ -1,46 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Broken Picture Phone</title>
-    <link rel="stylesheet" href="/style.css" />
 
-    <script src="/socket.io/socket.io.js" defer></script>
-    <script src="draw.js" defer></script>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Broken Picture Phone</h1>
-      <div class="text-blocks">
-        <div class="text-history" id="text-history"></div>
-        <div class="turn-info" id="turn-info"></div>
-        <input
-          type="text"
-          id="sentence-input"
-          placeholder="Enter your sentence here"
-        />
-        <button id="submit-text" class="button">Submit</button>
-        <div id="previous-text-container" style="display: none">
-          <h2 id="prev-text">Previous Text</h2>
-          <p id="previous-text"></p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>enBrok urePict phoneTele</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/style.css" />
+
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="draw.js" defer></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <h1>enBrok urePict phoneTele</h1>
+        <div class="text-blocks">
+          <div class="text-history" id="text-history"></div>
+          <div class="turn-info" id="turn-info"></div>
+          <input type="text" id="sentence-input" placeholder="Enter your description here" />
+          <button id="submit-text" class="button">Submit</button>
+          <div id="previous-text-container" style="display: none">
+            <h2 id="prev-text">Previous Text</h2>
+            <p id="previous-text"></p>
+          </div>
         </div>
-      </div>
-      <button id="show-stats" class="hidden">Show stats</button>
-      <div id="display-text"></div>
-      <div id="canvas-container">
-        <div id="previous-canvas-container" style="display: none">
-          <h2 id="prev-drawing">Previous Drawing</h2>
-          <canvas id="previous-drawing-canvas"></canvas>
+        <button id="show-stats" class="hidden">Show stats</button>
+        <div id="display-text"></div>
+        <div id="canvas-container">
+          <div id="previous-canvas-container" style="display: none">
+            <h2 id="prev-drawing">Previous Drawing</h2>
+            <canvas id="previous-drawing-canvas"></canvas>
+          </div>
+          <div id="current-canvas-container">
+            <canvas class="canvas-container" id="current-drawing-canvas"></canvas>
+          </div>
         </div>
-        <div id="current-canvas-container">
-          <canvas class="canvas-container" id="current-drawing-canvas"></canvas>
+        <div></div>
+        <div class="submit-block">
+          <button id="submit-drawing" class="button">Submit</button>
         </div>
-      </div>
-      <div></div>
-      <div class="submit-block">
-        <button id="submit-drawing" class="button">Submit</button>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
 </html>
