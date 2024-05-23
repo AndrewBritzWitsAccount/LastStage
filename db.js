@@ -28,7 +28,7 @@ db.serialize(() => {
   db.run(
     `CREATE TABLE IF NOT EXISTS loggedInUsers (
             id INTEGER PRIMARY KEY,
-            userId INTEGER NOT NULL,
+            userId INTEGER NOT NULL UNIQUE,
             isAdmin BOOLEAN DEFAULT 0,
             updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
             FOREIGN KEY(userId) REFERENCES users(id)
@@ -62,7 +62,10 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS gameImages (
             id INTEGER PRIMARY KEY,
             imagePath TEXT NOT NULL,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL 
+            gameID STRING NOT NULL,
+            userId INTEGER NOT NULL,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            FOREIGN KEY(userId) REFERENCES users(id) 
         )`,
     (err) => {
       if (err) {
@@ -76,7 +79,10 @@ db.serialize(() => {
     `CREATE TABLE IF NOT EXISTS gameDescriptions (
             id INTEGER PRIMARY KEY,
             description TEXT NOT NULL,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL 
+            gameID STRING NOT NULL,
+            userId INTEGER NOT NULL,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            FOREIGN KEY(userId) REFERENCES users(id)
         )`,
     (err) => {
       if (err) {
@@ -86,24 +92,6 @@ db.serialize(() => {
         );
       }
       console.log('Created gameDescriptions table.');
-    }
-  );
-
-  db.run(
-    `CREATE TABLE IF NOT EXISTS gameTurns (
-            id INTEGER PRIMARY KEY,
-            gameId INTEGER NOT NULL,
-            userId INTEGER NOT NULL,
-            gameAction INTEGER NOT NULL,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            FOREIGN KEY(gameId) REFERENCES games(id),
-            FOREIGN KEY(userId) REFERENCES users(id)
-        )`,
-    (err) => {
-      if (err) {
-        return console.error('Error creating gameTurns table', err.message);
-      }
-      console.log('Created gameTurns table.');
     }
   );
 
@@ -140,10 +128,25 @@ db.getUser = (username) => {
   });
 };
 
-db.saveGameImage = (imagePath) => {
+db.getDescription = (description) => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT * FROM gameDescriptions WHERE description = ?`,
+      [description],
+      (err, row) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(row);
+      }
+    );
+  });
+};
+
+db.saveGameImage = (imagePath, gameId) => {
   db.run(
-    `INSERT INTO gameImages (imagePath) VALUES (?)`,
-    [imagePath],
+    `INSERT INTO gameImages (imagePath, gameID) VALUES (?, ?)`,
+    [imagePath, gameId],
     (err) => {
       if (err) {
         return console.error('Error inserting game image', err.message);
@@ -154,10 +157,10 @@ db.saveGameImage = (imagePath) => {
   );
 };
 
-db.saveGameDescription = (description) => {
+db.saveGameDescription = (description, gameId) => {
   db.run(
-    `INSERT INTO gameDescriptions (description) VALUES (?)`,
-    [description],
+    `INSERT INTO gameDescriptions (description, gameID) VALUES (?, ?)`,
+    [description, gameId],
     (err) => {
       if (err) {
         return console.error('Error inserting game description', err.message);

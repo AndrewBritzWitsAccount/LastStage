@@ -1,5 +1,6 @@
 const socket = io();
-
+window.localStorage.removeItem('username');
+window.localStorage.removeItem('userId');
 document
   .getElementById('register-form')
   .addEventListener('submit', async (event) => {
@@ -13,6 +14,6 @@ document
     //   console.log(message);
     //   window.location.href = '/login';
     // });
-
+    window.location.href = '/login';
     document.getElementById('register-form').reset();
   });

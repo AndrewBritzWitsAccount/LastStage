@@ -12,12 +12,12 @@ document
       },
       body: JSON.stringify({ username, password }),
     });
-    console.log('res', response.body);
+    console.log('res', response);
     if (response.status === 200) {
       console.log(response);
       // add username to local storage
       localStorage.setItem('username', username);
-      localStorage.setItem('userId', response.userId);
+      //   localStorage.setItem('userId', response.userId);
       window.location.href = '/lobby';
     } else {
       console.log('Login failed');

@@ -21,6 +21,7 @@ socket.on('playerList', (players) => {
   players.forEach((player) => {
     // if player is same username as the current user, enable the start game button
     if (player.username === username && player.isAdmin) {
+      window.localStorage.setItem('isAdmin', true);
       document.getElementById('start-game').disabled = false;
     }
   });

@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 let players = [];
 let currentPlayerIndex = 0;
+let gameId = '';
 let gameData = [];
 let isDrawingTurn = false; // Track if the current turn is for drawing or writing
 let totalTurns = 0;
@@ -55,7 +56,8 @@ app.post('/login', async (req, res) => {
       if (players.length === 0) {
         db.logInUser(user.id, true);
         loginMessage = 'You are the admin for this game';
-        res.status(200).send(loginMessage);
+        // return response with user id
+        return res.status(200).send({ loginMessage, userId: user.id });
       } else {
         db.logInUser(user.id, false);
         loginMessage = 'You are a player for this game';
@@ -80,16 +82,32 @@ app.post('/uploadImage', async (req, res) => {
       res.status(500).send('Error saving image');
     } else {
       const imageUrl = `http://localhost:${PORT}/uploads/${fileName}`;
-      const insertResponse = await db.saveGameImage(imageUrl);
+      await db.saveGameImage(imageUrl, gameId);
+      gameData.push({
+        type: 'image',
+        content: imageUrl,
+        username: players[currentPlayerIndex].username,
+        time: new Date(),
+      });
       res.status(200).send('Image saved successfully');
     }
   });
 });
 
+app.get('/userId', async (req, res) => {
+  const username = req.body.username;
+  const user = await db.getUser(username);
+  if (user) {
+    res.status(200).send(user.id);
+  } else {
+    res.status(500).send('Error getting user id');
+  }
+});
+
 app.post('/gameDescription', (req, res) => {
   const description = req.body.desc;
   console.log(description);
-  const response = db.saveGameDescription(description);
+  const response = db.saveGameDescription(description, gameId);
   if (response) {
     res.status(200).send('Description saved successfully');
   } else {
@@ -109,13 +127,14 @@ app.post('/gameDescription', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('joinGame', (username) => {
+    gameId = `${socket.id}-${Date.now()}`;
     if (players.length == 0) {
       players.push({ id: socket.id, username: username, isAdmin: true });
     } else {
       players.push({ id: socket.id, username: username, isAdmin: false });
     }
     socket.emit('playerList', players);
-    socket.broadcast.emit('newPlayerList', players);
+    io.emit('newPlayerList', players);
     // if (players.length >= 2) {
     //   socket.emit('gameStart', 'Game has started');
     //   socket.broadcast.emit('joinGameStart', 'Game has started');
@@ -130,7 +149,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getTurn', () => {
-    if (players.length >= 2) {
+    if (players.length >= 2 && players.length <= 5) {
       const randomPlayer = players[0];
       socket.emit('startTurn', {
         player: randomPlayer.username,
@@ -146,10 +165,10 @@ io.on('connection', (socket) => {
   });
 
   // use socket to handle registeration of users and write the data to the database
-  socket.on('register', (user) => {
+  socket.on('register', async (user) => {
     // Handle user registration and write the data to the database
     const hashedPassword = bycrypt.hashSync(user.password, 10);
-    const response = db.registerUser({
+    const response = await db.registerUser({
       username: user.username,
       password: hashedPassword,
     });
@@ -160,8 +179,14 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('sentence', (sentence) => {
-    gameData.push({ type: 'sentence', content: sentence });
+  socket.on('sentence', async (sentence) => {
+    // description = await db.getDescription(sentence);
+    gameData.push({
+      type: 'sentence',
+      content: sentence,
+      username: players[currentPlayerIndex].username,
+      time: new Date(),
+    });
     isDrawingTurn = true;
     totalTurns++;
     if (totalTurns >= maxRounds * players.length * 2) {
@@ -171,17 +196,17 @@ io.on('connection', (socket) => {
       currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
 
       //   socket.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
-      console.log('players', currentPlayerIndex);
-      socket.emit('turn', {
+
+      io.emit('turn', {
         player: players[currentPlayerIndex].username,
         turnType: isDrawingTurn ? 'drawing' : 'sentence',
         previousData: sentence,
       });
-      socket.broadcast.emit('turn', {
-        player: players[currentPlayerIndex].username,
-        turnType: isDrawingTurn ? 'drawing' : 'sentence',
-        previousData: sentence,
-      });
+      //   socket.broadcast.emit('turn', {
+      //     player: players[currentPlayerIndex].username,
+      //     turnType: isDrawingTurn ? 'drawing' : 'sentence',
+      //     previousData: sentence,
+      //   });
     }
   });
 
@@ -192,19 +217,19 @@ io.on('connection', (socket) => {
 
     if (totalTurns >= maxRounds * players.length * 2) {
       io.emit('gameOver', gameData); // Notify all players that the game is over
-      resetGameState();
+
       console.log('game over');
     } else {
       currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
       socket.emit('endTurn', players[currentPlayerIndex]); // Signal end of turn
-      socket.emit('turn', {
+      io.emit('turn', {
         player: players[currentPlayerIndex].username,
         turnType: isDrawingTurn ? 'drawing' : 'sentence',
       });
-      socket.broadcast.emit('turn', {
-        player: players[currentPlayerIndex].username,
-        turnType: isDrawingTurn ? 'drawing' : 'sentence',
-      });
+      //   socket.broadcast.emit('turn', {
+      //     player: players[currentPlayerIndex].username,
+      //     turnType: isDrawingTurn ? 'drawing' : 'sentence',
+      //   });
     }
   });
 
@@ -215,6 +240,10 @@ io.on('connection', (socket) => {
       // Reset game state if all players disconnect
       resetGameState();
     }
+  });
+  socket.on('show-stats', () => {
+    io.emit('display-stats', gameData);
+    resetGameState();
   });
 });
 

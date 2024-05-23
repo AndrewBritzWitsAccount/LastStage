@@ -1,4 +1,5 @@
 const username = window.localStorage.getItem('username');
+
 socket = io();
 socket.emit('getTurn');
 let players = [];
@@ -43,6 +44,65 @@ socket.on('turn', (data) => {
     enableText(player, turnType);
   }
 });
+
+socket.on('gameOver', (gameData) => {
+  console.log('Game Over');
+  console.log(gameData);
+  // sort gameData by the time it has for each entry ascending order
+  gameData.sort((a, b) => new Date(a.time) - new Date(b.time));
+
+  // insert a text into html div with id dispal-text
+  document.getElementById('display-text').innerHTML = 'Game Over';
+
+  const isAdmin = window.localStorage.getItem('isAdmin');
+  if (isAdmin) document.getElementById('show-stats').classList.remove('hidden');
+
+  document.getElementById('show-stats').addEventListener('click', () => {
+    socket.emit('show-stats');
+  });
+
+  window.localStorage.removeItem('isAdmin');
+  window.localStorage.removeItem('username');
+  window.localStorage.removeItem('userId');
+});
+
+socket.on('display-stats', (gameData) => {
+  console.log('Displaying stats');
+  showStats(gameData);
+});
+
+function showStats(gameData) {
+  const displayText = document
+    .getElementById('display-text')
+    .classList.remove('hidden');
+  displayText.innerHTML = '';
+
+  // hide the canvas
+  document.getElementById('current-canvas-container').classList.add('hidden');
+  document.getElementById('sentence-input').classList.add('hidden');
+  document.getElementById('submit-text').classList.add('hidden');
+  document.getElementById('submit-drawing').classList.add('hidden');
+  console.log('inside', gameData);
+  // iterate through the gameData array and display the content of each entry in a list within display-text
+  gameData.forEach((entry) => {
+    const li = document.createElement('li');
+    console.log(entry);
+    if (entry.type === 'sentence') {
+      // if the entry is text
+      li.appendChild(
+        document.createTextNode(`${entry.username} wrote: ${entry.content}`)
+      );
+    } else if (entry.type === 'image') {
+      // if the entry is image
+      const img = document.createElement('img');
+      //remove http://localhost:3000 from the image url
+      entry.content = entry.content.replace('http://localhost:${PORT}', '');
+      img.src = entry.content;
+      li.appendChild(img);
+    }
+    displayText.appendChild(li);
+  });
+}
 
 // socket.on('endTurn', (player) => {
 //   if (player.username === username) {
@@ -170,13 +230,13 @@ submitButton.addEventListener('click', async () => {
   const data = {
     desc,
   };
-  // const response = await fetch('/gameDescription', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify(data),
-  // });
-  socket.emit('sentence', desc);
+  await fetch('/gameDescription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  socket.emit('sentence', desc, username);
   document.getElementById('sentence-input').value = '';
 });
