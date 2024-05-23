@@ -94,7 +94,9 @@ function showStats(gameData) {
     if (entry.type === 'sentence') {
       // if the entry is text
       li.appendChild(
-        document.createTextNode(`${entry.username} wrote: ${entry.content}`)
+        document.createTextNode(
+          `${entry.username} wrote: ${entry.content} at ${entry.time}`
+        )
       );
     } else if (entry.type === 'image') {
       // if the entry is image
@@ -106,7 +108,8 @@ function showStats(gameData) {
       img.alt = 'Image by ' + entry.username;
 
       const label = document.createElement('label');
-      label.textContent = 'Image by ' + entry.username;
+      label.textContent =
+        'Image by ' + entry.username + ' at this time :' + entry.time;
       label.appendChild(img);
 
       li.appendChild(label);
