@@ -134,7 +134,7 @@ io.on('connection', (socket) => {
       const randomPlayer = players[Math.floor(Math.random() * players.length)];
       players.forEach((player) => {
         player.turnType =
-          player.id === randomPlayer.id ? 'drawing' : 'sentence';
+          player.id === randomPlayer.id ? 'sentence' : 'nothing';
       });
       socket.emit('turn', players);
       socket.broadcast.emit('activePlayer', players);

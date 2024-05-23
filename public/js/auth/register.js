@@ -1,4 +1,4 @@
-import { socketConnection } from '../socketConnection.js';
+const socket = io();
 
 document
   .getElementById('register-form')
@@ -7,7 +7,7 @@ document
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    socketConnection.emit('register', { username, password });
+    socket.emit('register', { username, password });
     // move to login page on registration success
     // socketConnection.on('registrationSuccess', (message) => {
     //   console.log(message);

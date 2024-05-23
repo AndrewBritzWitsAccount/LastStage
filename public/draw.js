@@ -27,6 +27,12 @@ socket.on('activePlayer', (data) => {
 function enableSentenceInput() {
   document.getElementById('sentence-input').classList.remove('hidden');
   document.getElementById('current-canvas-container').classList.add('hidden');
+  document
+    .getElementById('submit-text')
+    .classList.remove('hidden').disabled = false;
+  document
+    .getElementById('submit-drawing')
+    .classList.add('hidden').disabled = true;
 }
 
 // function to turn input field with id sentence-input class from visible to hidden
@@ -35,6 +41,12 @@ function disableSentenceInput() {
   document
     .getElementById('current-canvas-container')
     .classList.remove('hidden');
+  document
+    .getElementById('submit-text')
+    .classList.add('hidden').disabled = true;
+  document
+    .getElementById('submit-drawing')
+    .classList.remove('hidden').disabled = false;
 }
 
 const currentCanvas = document.getElementById('current-drawing-canvas');
@@ -86,19 +98,21 @@ currentCanvas.addEventListener('mouseup', stopDrawing);
 currentCanvas.addEventListener('mouseout', stopDrawing);
 
 // add onclick event to convert canvas to image
-document.getElementById('submit-button').addEventListener('click', async () => {
-  const image = currentCanvas.toDataURL('image/png');
-  const response = await fetch('/uploadImage', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ imageData: image }),
+document
+  .getElementById('submit-drawing')
+  .addEventListener('click', async () => {
+    const image = currentCanvas.toDataURL('image/png');
+    const response = await fetch('/uploadImage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ imageData: image }),
+    });
+    if (response.ok) {
+      console.log('Image uploaded successfully');
+    }
   });
-  if (response.ok) {
-    console.log('Image uploaded successfully');
-  }
-});
 
 // Get the submit button element
 const submitButton = document.getElementById('submit-text');
@@ -123,5 +137,3 @@ submitButton.addEventListener('click', async () => {
     body: JSON.stringify(data),
   });
 });
-
-const drawButton = document.getElementById('submit-drawing');
