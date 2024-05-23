@@ -72,9 +72,7 @@ socket.on('display-stats', (gameData) => {
 });
 
 function showStats(gameData) {
-  const displayText = document
-    .getElementById('display-text')
-    .classList.remove('hidden');
+  const displayText = document.getElementById('display-text');
   displayText.innerHTML = '';
 
   // hide the canvas
