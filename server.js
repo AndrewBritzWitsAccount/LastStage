@@ -71,10 +71,10 @@ app.post('/login', async (req, res) => {
         res.status(200).send(loginMessage);
       }
     } else {
-      res.status(401).send('Login failed');
+      res.status(401).send('Login failed 1');
     }
   } else {
-    res.status(401).send('Login failed');
+    res.status(401).send('Login failed 2');
   }
 });
 
