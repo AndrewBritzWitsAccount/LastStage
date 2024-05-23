@@ -81,7 +81,7 @@ app.post('/uploadImage', async (req, res) => {
       console.error(err);
       res.status(500).send('Error saving image');
     } else {
-      const imageUrl = `http://localhost:${PORT}/uploads/${fileName}`;
+      const imageUrl = `/uploads/${fileName}`;
       await db.saveGameImage(imageUrl, gameId);
       gameData.push({
         type: 'image',
@@ -189,7 +189,7 @@ io.on('connection', (socket) => {
     });
     isDrawingTurn = true;
     totalTurns++;
-    if (totalTurns >= maxRounds * players.length * 2) {
+    if (totalTurns == maxRounds * players.length * 2) {
       io.emit('gameOver', gameData); // Notify all players that the game is over
       resetGameState();
     } else {
@@ -215,7 +215,7 @@ io.on('connection', (socket) => {
     isDrawingTurn = false;
     totalTurns++;
 
-    if (totalTurns >= maxRounds * players.length * 2) {
+    if (totalTurns == maxRounds * players.length * 2) {
       io.emit('gameOver', gameData); // Notify all players that the game is over
 
       console.log('game over');
