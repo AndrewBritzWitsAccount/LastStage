@@ -1,3 +1,5 @@
+const io = require('socket.io-client');
+
 const socket = io();
 const previousCanvas = document.getElementById('previous-drawing-canvas');
 const currentCanvas = document.getElementById('current-drawing-canvas');
@@ -245,3 +247,14 @@ document.addEventListener('keydown', (e) => {
     handleSubmit();
   }
 });
+
+module.exports = {
+  resizeCanvas,
+  handleSubmit,
+  startDrawing,
+  draw,
+  stopDrawing,
+  enableDrawing,
+  disableDrawing,
+  socket,
+};

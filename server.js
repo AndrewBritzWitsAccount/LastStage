@@ -55,27 +55,33 @@ app.post('/login', async (req, res) => {
   // Handle user login
   const { username, password } = req.body;
   const user = await db.getUser(username);
-  const present = await db.checkIfLoggedIn(user.id);
-  let loginMessage = 'Login successful';
-  if (user && !present) {
-    const isPasswordCorrect = bycrypt.compareSync(password, user.password);
-    if (isPasswordCorrect) {
-      if (players.length === 0) {
-        db.logInUser(user.id, true);
-        loginMessage = 'You are the admin for this game';
-        // return response with user id
-        return res.status(200).send({ loginMessage, userId: user.id });
+  if (user != null) {
+    const present = await db.checkIfLoggedIn(user.id);
+    let loginMessage = 'Login successful';
+
+    if (user && !present) {
+      const isPasswordCorrect = bycrypt.compareSync(password, user.password);
+      if (isPasswordCorrect) {
+        if (players.length === 0) {
+          db.logInUser(user.id, true);
+          loginMessage = 'You are the admin for this game';
+          // return response with user id
+          return res.status(200).send({ loginMessage, userId: user.id });
+        } else {
+          db.logInUser(user.id, false);
+          loginMessage = 'You are a player for this game';
+          res.status(200).send(loginMessage);
+        }
       } else {
-        db.logInUser(user.id, false);
-        loginMessage = 'You are a player for this game';
-        res.status(200).send(loginMessage);
+        res.status(401).send('Login failed');
       }
     } else {
       res.status(401).send('Login failed 1');
     }
-  } else {
-    res.status(401).send('Login failed 2');
   }
+  // else {
+  //   alert('Not registered or wrong password. Go back and register');
+  // }
 });
 
 app.post('/uploadImage', async (req, res) => {

@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Broken Picture Phone</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script src="/socket.io/socket.io.js" defer></script>
-    <script src="text.js" defer></script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="text-blocks">
-        <h1>Broken Picture Phone</h1>
-        <div class="text-history" id="text-history"></div>
-        <div class="turn-info" id="turn-info"></div>
-        <input
-          type="text"
-          id="sentence-input"
-          placeholder="Enter your sentence here"
-        />
-        <div id="previous-text-container" style="display: none">
-          <h2 id="prev-text">Previous Text</h2>
-          <p id="previous-text"></p>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Broken Picture Phone</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="text.js" defer></script>
+</head>
+
+<body>
+  <div class="container page-container">
+    <div class="row">
+      <div class="col">
+        <div class="text-blocks">
+          <h1>Broken Picture Phone</h1>
+          <div class="text-history" id="text-history"></div>
+          <div class="turn-info" id="turn-info"></div>
+          <input type="text" id="sentence-input" placeholder="Enter your sentence here" />
+          <div id="previous-text-container" style="display: none">
+            <h2 id="prev-text">Draw the following . . .</h2>
+            <p id="previous-text"></p>
+          </div>
+        </div>
+        <div class="submit-block">
+          <button id="submit-button">Submit</button>
         </div>
       </div>
-      <div class="submit-block">
-        <button id="submit-button">Submit</button>
-      </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
