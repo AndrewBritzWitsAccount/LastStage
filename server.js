@@ -33,6 +33,12 @@ app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/', 'register.html'));
 });
 
+app.get('/uploads/:fileName', (req, res) => {
+  const fileName = req.params.fileName;
+  const imagePath = path.join(__dirname, 'uploads', fileName);
+  res.sendFile(imagePath);
+});
+
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/', 'login.html'));
 });
