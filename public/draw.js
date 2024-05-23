@@ -48,8 +48,13 @@ socket.on('turn', (data) => {
 socket.on('gameOver', (gameData) => {
   console.log('Game Over');
   console.log(gameData);
+  document.getElementById('current-canvas-container').classList.add('hidden');
+  document.getElementById('sentence-input').classList.add('hidden');
+  document.getElementById('submit-text').classList.add('hidden');
+  document.getElementById('submit-drawing').classList.add('hidden');
   // sort gameData by the time it has for each entry ascending order
   gameData.sort((a, b) => new Date(a.time) - new Date(b.time));
+
   document.getElementById('display-text').classList.remove('hidden');
   // insert a text into html div with id dispal-text
   document.getElementById('display-text').innerHTML = 'Game Over';
@@ -77,10 +82,7 @@ function showStats(gameData) {
   displayText.innerHTML = '';
 
   // hide the canvas
-  document.getElementById('current-canvas-container').classList.add('hidden');
-  document.getElementById('sentence-input').classList.add('hidden');
-  document.getElementById('submit-text').classList.add('hidden');
-  document.getElementById('submit-drawing').classList.add('hidden');
+
   console.log('inside', gameData);
   // iterate through the gameData array and display the content of each entry in a list within display-text
   gameData.forEach((entry) => {
