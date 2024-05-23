@@ -55,6 +55,7 @@ socket.on('gameOver', (gameData) => {
   document.getElementById('display-text').innerHTML = 'Game Over';
 
   const isAdmin = window.localStorage.getItem('isAdmin');
+  console.log('isAdmin', isAdmin);
   if (isAdmin) document.getElementById('show-stats').classList.remove('hidden');
 
   document.getElementById('show-stats').addEventListener('click', () => {
