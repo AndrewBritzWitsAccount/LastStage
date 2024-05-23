@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Broken Picture Phone</title>
     <link rel="stylesheet" href="/style.css" />
-
     <script src="/socket.io/socket.io.js" defer></script>
-    <script src="draw.js" defer></script>
+    <script src="text.js" defer></script>
   </head>
   <body>
     <div class="container">
@@ -18,7 +17,6 @@
         <input
           type="text"
           id="sentence-input"
-          class="hidden"
           placeholder="Enter your sentence here"
         />
         <div id="previous-text-container" style="display: none">
@@ -26,18 +24,6 @@
           <p id="previous-text"></p>
         </div>
       </div>
-
-      <div class="drawing-blocks">
-        <div id="previous-canvas-container" style="display: none">
-          <h2 id="prev-drawing">Previous Drawing</h2>
-          <canvas id="previous-drawing-canvas"></canvas>
-        </div>
-        <div id="current-canvas-container">
-          <h2 id="your-drawing-title">Your Drawing</h2>
-          <canvas id="current-drawing-canvas"></canvas>
-        </div>
-      </div>
-
       <div class="submit-block">
         <button id="submit-button">Submit</button>
       </div>
