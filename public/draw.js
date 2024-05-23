@@ -101,7 +101,7 @@ document.getElementById('submit-button').addEventListener('click', async () => {
 });
 
 // Get the submit button element
-const submitButton = document.getElementById('submit-button');
+const submitButton = document.getElementById('submit-text');
 
 // Add event listener to the submit button
 submitButton.addEventListener('click', async () => {
@@ -123,3 +123,5 @@ submitButton.addEventListener('click', async () => {
     body: JSON.stringify(data),
   });
 });
+
+const drawButton = document.getElementById('submit-drawing');
